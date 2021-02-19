@@ -14,7 +14,7 @@ Education
 * M.S. in Computer Science, TBD, TBD
 * B.S. in Computer Science, UC San Diego, 2018 ~ 2021
 
-Work experience
+Work Experience
 ======
 * Summer 2020: Computer Architecture Intern @ NVIDIA
   * TODO
@@ -24,8 +24,9 @@ Work experience
   
 Skills
 ======
-* Skill 1
-* Skill 2
+* Deep Learning
+* Computer Vision
+* Python, 
   * Sub-skill 2.1
   * Sub-skill 2.2
   * Sub-skill 2.3
