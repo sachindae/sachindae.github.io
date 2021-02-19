@@ -11,8 +11,8 @@ redirect_from:
 
 Education
 ======
-* B.S. in Computer Science, UC San Diego, 2018-2021
 * M.S. in Computer Science, TBD, TBD
+* B.S. in Computer Science, UC San Diego, 2018 ~ 2021
 
 Work experience
 ======
