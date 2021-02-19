@@ -8,7 +8,7 @@ redirect_from:
   - /about.html
 ---
 
-I'm a 3rd-year undergraduate student studying Computer Science at UC San Diego, and will be starting a Masters program in Fall.
+I'm a 3rd-year undergraduate student studying Computer Science at UC San Diego, and will be starting a Masters program in Fall 2021.
 My primary research interests are computer vision and applications of deep learning for music-related tasks.
 
 Currently I'm working with [Prof. Taylor Berg-Kirkpatrick](https://cseweb.ucsd.edu/~tberg/) on optical music recognition as part
