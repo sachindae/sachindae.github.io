@@ -1,7 +1,7 @@
 ---
 title: "An Empirical Evaluation of End-to-End Polyphonic Optical Music Recognition"
 collection: publications
-permalink: /publication/ismir2021
+permalink: /publications
 excerpt: 'Coming Soon'
 date: 2009-10-01
 venue: 'ISMIR 2021'
