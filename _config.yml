@@ -113,7 +113,7 @@ author:
   vine             :
   weibo            :
   xing             :
-  youtube          : "channel/UC45j1HTAXKZzQCUO7kitDNg"
+  youtube          : # "channel/UC45j1HTAXKZzQCUO7kitDNg" UC45j1HTAXKZzQCUO7kitDNg
   wikipedia        :
 
 
@@ -191,17 +191,6 @@ collections:
 
 # Defaults
 defaults:
-  # _posts
-  - scope:
-      path: ""
-      type: posts
-    values:
-      layout: single
-      author_profile: true
-      read_time: true
-      comments: true
-      share: true
-      related: true
   # _pages
   - scope:
       path: ""
