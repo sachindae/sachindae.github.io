@@ -8,10 +8,10 @@ redirect_from:
   - /about.html
 ---
 
-I'm a 1st-year Masters student studying Computer Science at UC San Diego. My primary research interests are the intersection of 
-computer vision and NLP, as well as applications of deep learning to music-related tasks. All my work on vision and langauge is jointly
-advised by [Prof. Hao Su](http://ai.ucsd.edu/~haosu/) and [Prof. Taylor Berg-Kirkpatrick](https://cseweb.ucsd.edu/~tberg/). Additionally,
-I have been working with [Prof. Taylor Berg-Kirkpatrick](https://cseweb.ucsd.edu/~tberg/) on optical music recognition.
+I'm a computer scientist who is especially passionate about artifical intelligence. My primary research interests are music-related tasks 
+and the intersection of computer vision and NLP. While in school, I worked with [Prof. Hao Su](http://ai.ucsd.edu/~haosu/) and 
+[Prof. Taylor Berg-Kirkpatrick](https://cseweb.ucsd.edu/~tberg/) on zero-shot learning for vision by using large language models. Additionally,
+I worked with [Prof. Taylor Berg-Kirkpatrick](https://cseweb.ucsd.edu/~tberg/) on optical music recognition, which can be described as OCR for music.
 
-Previously, I have interned at NVIDIA and mCube, and received my bachelor's degree in Computer Science from UC
+Previously, I have interned at Amazon, NVIDIA and mCube, and received my master's and bachelor's degrees in Computer Science from UC
 San Diego. 
