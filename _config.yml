@@ -81,10 +81,10 @@ author:
   name             : "Sachinda Edirisooriya"
   avatar           : "profile.png"
   bio              : "MS Computer Science @ UCSD"
-  location         : "Morgan Hill, CA"
+  location         : "Seattle, WA"
   employer         :
   pubmed           :  # "https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
-  googlescholar    :  "https://scholar.google.com/citations?user=KEQ-pioAAAAJ"
+  googlescholar    :  "https://scholar.google.com/citations?user=-ZP9rbkAAAAJ&hl=en"
   email            :
   researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
   uri              :
@@ -107,7 +107,7 @@ author:
   stackoverflow    : # http://stackoverflow.com/users/123456/username
   steam            :
   tumblr           :
-  twitter          : "sachindae"
+  twitter          :
   vine             :
   weibo            :
   xing             :
