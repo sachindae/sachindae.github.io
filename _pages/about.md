@@ -8,7 +8,7 @@ redirect_from:
   - /about.html
 ---
 
-I am currently a Machine Learning Engineer at Annapurna Labs working on LLM inference acceleration for AWS Trainium chips.
+I am currently a Machine Learning Engineer at Annapurna Labs working on accelerating LLM inference for AWS Trainium chips.
 
 Previously, I have worked at Amazon Music and SpaceX, and interned at NVIDIA, and received my master's and bachelor's degrees in Computer Science from UC San Diego. 
 
