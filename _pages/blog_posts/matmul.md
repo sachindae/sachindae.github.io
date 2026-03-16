@@ -27,9 +27,15 @@ Below, we implement matrix multiplication in several different ways to improve t
 
 Before getting started, I'm using a laptop with the following specs:
 ```
-13th Gen Intel I5-1335U
-- 8 Efficient Cores (3.4 GHz Max Turboboost)
-- 2 Performance Cores (4.6 GHz Max Turboboost)
+- 13th Gen Intel I5-1335U
+   - 8 Efficient Cores (3.4 GHz Max Turboboost)
+   - 2 Performance Cores (4.6 GHz Max Turboboost)
+   - Caches (sum of all):
+      - L1d: 352 KiB (10 instances)
+      - L1i: 576 KiB (10 instances)
+      - L2: 6.5 MiB (4 instances)
+      - L3: 12 MiB (1 instance)
+
 - 16 GB RAM (3200 MT/s)
 ```
 
