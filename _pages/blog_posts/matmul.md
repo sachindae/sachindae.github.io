@@ -104,15 +104,4 @@ This memory access reduction lowered the overall runtime from 1500 seconds -> 25
 
 ### Tiled MM 
 
-
-
-### References
-
-Below are some great resources that I referred to before writing this post:
-1. TODO
-1. TODO
-
-
-
-
-
+TODO
