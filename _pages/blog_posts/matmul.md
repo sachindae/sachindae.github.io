@@ -68,7 +68,7 @@ Importantly, for every 2 FLOPS we need to move 16 bytes of data around. A term o
 called arithmetic intensity, which is defined as the ratio of FLOPS to bytes. In this case, for every
 2 FLOPS, we need to transfer 16 bytes to/from memory, so the arithmetic intensity is (1 / 8). However, a key
 point to note here is that we don't necessarily transfer these bytes to/from memory in the implementation above.
-Naturally, we end up using the CPU's caches 
+Instead, we end up using the CPU's caches as a temporary faster storage than memory during the computation.
 
 Given that the memory speed on my hardware is 3200 MT/s and each transfer is 8 bytes, this means I can transfer 
 25.6 GB/s. Assuming I'm fully utilizing that memory transfer bandwidth, I'd only be able to do 3.2 GFLOPS of compute
