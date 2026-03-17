@@ -158,6 +158,6 @@ for(int i = 0; i < MATRIX_DIM; i++) {
 ```
 
 Note that I also needed to add the `#pragma omp simd` directive as I noticed the vectorization got removed from
-the assembly when compiling with OpenMP initially. Ideally we'd expect around a 10x speedup since there are 10 physical cores, but this change only improved the runtime from 20 seconds to 14 seconds, a 1.42x speedup. This is most likely due to the additional memory/cache pressure that comes from having 10 threads running in parallel with the current implementation.
+the assembly when compiling with OpenMP initially. Ideally we'd expect around a 10x speedup since there are 10 physical cores, but this change only improved the runtime from 20 seconds to 14 seconds, a 1.42x speedup. This is most likely due to the additional memory/cache pressure that comes from having 10 threads running in parallel with the current implementation. In any case, this optimization brings us to 9.8 GFLOPS.
 
 ### Tiled MM
