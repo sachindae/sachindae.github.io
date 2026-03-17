@@ -35,7 +35,6 @@ Before getting started, I'm using a laptop with the following specs:
       - L1i: 576 KiB (10 instances)
       - L2: 6.5 MiB (4 instances)
       - L3: 12 MiB (1 instance)
-
 - 16 GB RAM (3200 MT/s)
 ```
 
@@ -72,13 +71,14 @@ Looking at the naive matrix multiplication implementation from a compute and dat
 
 Importantly, for every 2 FLOPS we need to move 16 bytes of data around. A term often used to represent this is
 called arithmetic intensity, which is defined as the ratio of FLOPS to bytes. In this case, for every
-2 FLOPS, we need to transfer 16 bytes to/from memory, so the arithmetic intensity is (1 / 8). However, a key
-point to note here is that we don't necessarily transfer these bytes to/from memory in the implementation above.
-Instead, we end up using the CPU's caches as a temporary faster storage than memory during the computation.
+2 FLOPS, we need to transfer 16 bytes to/from memory, so the arithmetic intensity is (1 / 8).
 
 Given that the memory speed on my hardware is 3200 MT/s and each transfer is 8 bytes, this means I can transfer 
 25.6 GB/s. Assuming I'm fully utilizing that memory transfer bandwidth, I'd only be able to do 3.2 GFLOPS of compute
-which is far below the estimated HW theoretical max of 480 GFLOPS (10 cores * 3 GHz * 16 FLOPS). However, it's worth noting 
+which is far below the estimated HW theoretical max of 480 GFLOPS (10 cores * 3 GHz * 16 FLOPS). However, a key
+point to note here is that we don't necessarily transfer all data to/from memory in the implementation above.
+Instead, we end up using the CPU's caches as a temporary faster storage than memory during the computation in
+many cases.
 
 From timing the matrix multiplication above, it took ~1500 seconds, which puts the implementation at 0.09 GFLOPS.
 The reason why it is so much lower than the estimated peak of 3.2 GFLOPS is due to it being challenging for a single CPU core to saturate memory bandwidth, especially when doing other operations at the same time.
@@ -93,21 +93,71 @@ In the innermost loop of our naive implementation, we are accessing matrix B in 
 
 ```
 for(int i = 0; i < MATRIX_DIM; i++) {
-        for(int k = 0; k < MATRIX_DIM; k++) {
-            for(int j = 0; j < MATRIX_DIM; j++) {
-                // C[i][j] = Dot Product(Row I of A, Column J of B)
-                C[i*MATRIX_DIM + j] += A[i*MATRIX_DIM + k] * B[k*MATRIX_DIM + j];
-            }
+    for(int k = 0; k < MATRIX_DIM; k++) {
+        for(int j = 0; j < MATRIX_DIM; j++) {
+            // C[i][j] = Dot Product(Row I of A, Column J of B)
+            C[i*MATRIX_DIM + j] += A[i*MATRIX_DIM + k] * B[k*MATRIX_DIM + j];
         }
     }
+}
 ```
 
-Sure enough, this reduced the number of cache misses (e.g. memory accesses) significantly. Running cachegrind with a 512x512 matrix size (TODO: run on full size to get better memory access data):
+Sure enough, this reduced the number of cache misses (e.g. memory accesses) significantly. Running cachegrind with a 512x512 matrix size.
 - Naive Implementation: 134 million L1d cache misses, 50k L3 cache misses (e.g. memory accesses)
 - Reordered Implementation: 8.5 million L1d cache misses, 50k L3 cache misses (e.g. memory accesses)
 
-This memory access reduction lowered the overall runtime from 1500 seconds -> 250 seconds, a 6x speedup. 
+I'm too lazy to run cachegrind for the full 4096x4096 matrix size as it'd be extremely slow (since it simulates the caches), but the key idea is that the cache misses are significantly reduced with this access pattern. We don't see any difference in L3 cache misses since the matrices are ~1 MB each which easily fits into the 12 MB L3 cache on my machine.
 
-### Tiled MM 
+When measuring this, I saw a 6x speedup (1500 seconds -> 250 seconds) in the runtime, which is around 0.55 GFLOPS. 
 
-TODO
+### Compiler-Optimized MM
+
+Modern compilers can do quite a bit of optimization on your code when you tell them to (through compiler optimization flags). I'm using `gcc` for these experiments and the default optimization flag is `O0` which disables optimizations. When I passed in the `O3` flag, I saw a surprising 12.5x speedup (250 seconds -> 20 seconds), putting us at 6.9 GFLOPS. Above we discussed how we'd expect our implementation to reach at most ~3 GFLOPS assuming no vectorized assembly instructions are being used, so the compiler must be doing some sort of vectorization. Let's take a look at the assembly that the compiler generated:
+
+```
+.L3:
+        movups %xmm ...
+        movups %xmm ...
+        mulps %xmm ...
+        mulps %xmm ...
+        addps %xmm ...
+        addps %xmm ...
+        ...
+```
+
+In x86-64 assembly the `xmm` registers are 128 bits wide, and we can see the assembly doing a pretty tightly packed loop of vectorized multiplications and additions using these registers. Below is the assembly for the unoptimized assembly (uses gcc default flag `O0`):
+
+```
+.L6:
+        mulss %xmm ...
+        ...
+        ...
+        addss %xmm ...
+```
+
+Interestingly, vector registers are used, but the `addss` and `mulss` operations only actually do operations on the low single precision floating-point values. 
+
+### Parallelized MM
+
+With just two small changes (loop ordering and a compiler optimization flag), we've been able to speed up a matmul between two 4096x4096 from 1500 seconds to 20 seconds, a whopping 75x speedup. This took our matrix multiplication implementation from 0.09 GFLOPS to 6.9 GFLOPS. Now that we have an implementation running on a single core with reasonable performance, we can try parallelizing the matrix multiplication.
+
+In C, an easy way to parallelize programs is using OpenMP, an API for shared memory multi-processing. Below we add the `#pragma omp parallel for` directive to parallelize the outer for loop across all cores (1 thread per core):
+
+```
+#include <omp.h>
+
+#pragma omp parallel for
+for(int i = 0; i < MATRIX_DIM; i++) {
+    for(int k = 0; k < MATRIX_DIM; k++) {
+        #pragma omp simd
+        for(int j = 0; j < MATRIX_DIM; j++) {
+            C[i*MATRIX_DIM + j] += A[i*MATRIX_DIM + k] * B[k*MATRIX_DIM + j];
+        }
+    }
+}
+```
+
+Note that I also needed to add the `#pragma omp simd` directive as I noticed the vectorization got removed from
+the assembly when compiling with OpenMP initially. Ideally we'd expect around a 10x speedup since there are 10 physical cores, but this change only improved the runtime from 20 seconds to 14 seconds, a 1.42x speedup. This is most likely due to the additional memory/cache pressure that comes from having 10 threads running in parallel with the current implementation.
+
+### Tiled MM
