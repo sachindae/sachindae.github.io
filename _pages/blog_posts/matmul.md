@@ -158,6 +158,48 @@ for(int i = 0; i < MATRIX_DIM; i++) {
 ```
 
 Note that I also needed to add the `#pragma omp simd` directive as I noticed the vectorization got removed from
-the assembly when compiling with OpenMP initially. Ideally we'd expect around a 10x speedup since there are 10 physical cores, but this change only improved the runtime from 20 seconds to 14 seconds, a 1.42x speedup. This is most likely due to the additional memory/cache pressure that comes from having 10 threads running in parallel with the current implementation. In any case, this optimization brings us to 9.8 GFLOPS.
+the assembly when compiling with OpenMP initially. Ideally we'd expect around a 10x speedup since there are 10 physical cores, but this change only improved the runtime from 20 seconds to 14 seconds, a 1.42x speedup. This is most likely due to the additional memory/cache pressure that comes from having 10 threads running in parallel with the current implementation. The two inner loops use (which each thread executes in parallel) require us to read the full B matrix, which is around 67 MB (4096 * 4096 * 4 bytes). In any case, this optimization brings us to 9.8 GFLOPS.
 
 ### Tiled MM
+
+Above, we observed that each parallel task needs to read the full B matrix. This is extremely taxing on the shared L2 and L3 caches, meaning there are likely much more memory reads happening. Each parallel task we currently have computes one row of the output matrix C (4096 elements) by using one row of A and the full B matrix. In total, we have:
+- 4096 * 4 bytes ~= 16 KB read from A
+- 4096 * 4096 * 4 bytes ~= 67 MB read from B
+
+While we are efficiently using A (e.g. we just need to read it once and can compute all of the values of C that use it), we are using B quite inefficiently. We read all 4096 columns, but only use each column 1 time. One reasonable idea is to try read a balanced amount of rows and columns. Let's see how the memory accesses look if we try to have a single parallel task compute a 64x64 chunk of output matrix C (this is also 4096 elements like our existing implementation). We'd need to pull the 64 rows of A and 64 columns of B to do this. In total, this gives us:
+- 4096 * 64 * 4 bytes ~= 1 MB read from A
+- 4096 * 64 * 4 bytes ~= 1 MB read from B
+
+We can see that this approach is much more memory efficient. Using a bit of calculus, we can show that splitting 4096 into 64 and 64 gives the minimum sum of factors, which directly correlates to the amount of data read.
+
+```
+#pragma omp parallel for collapse(2)
+for(int it = 0; it < MATRIX_DIM; it += BLOCK_SIZE) {
+    for(int jt = 0; jt < MATRIX_DIM; jt += BLOCK_SIZE) {
+        for(int kt = 0; kt < MATRIX_DIM; kt += BLOCK_SIZE) {
+            for(int i = it; i < it + BLOCK_SIZE; i++) {
+                for(int k = kt; k < kt + BLOCK_SIZE; k++) {
+                    #pragma omp simd
+                    for(int j = jt; j < jt + BLOCK_SIZE; j++) {
+                        C[i*MATRIX_DIM + j] += A[i*MATRIX_DIM + k] * B[k*MATRIX_DIM + j];
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+With the tile-based parallel task split above, the runtime improves from 14 seconds to 8.5 seconds, a 1.65x speedup. Our implementation is now at 16.1 GFLOPS. 
+
+TODO: Show cache impact
+
+### More Compiler Optimizations
+
+TOOD: Discuss `-march=native` and `-ffast-math` compiler options
+
+Simply adding the two flags improved the runtime from 8.5 seconds to 2.2 seconds, roughly a 3.9x speedup. This gets us up to 62 GFLOPS.
+
+### Hand-Vectorized MM
+
+TODO
